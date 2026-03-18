@@ -143,6 +143,11 @@ class MigratableModel(BaseModel):
                 )
 
             data = migrate_func(data)
+            if not isinstance(data, dict):
+                raise ValueError(
+                    f"migrate_from_previous on {model_for_step.__name__} must return a dict, "
+                    f"got {type(data).__name__!r}"
+                )
 
         # Ensure serialized data always contains the current auto-managed version.
         data["model_version"] = cls.get_model_version()
