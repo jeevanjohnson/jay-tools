@@ -53,14 +53,26 @@ class MigratableModel(BaseModel):
 
         cls._previous_model = previous_model
 
-        if previous_model is not None and "migrate_from_previous" not in cls.__dict__:
-            raise TypeError(
-                f"{cls.__name__} must define a staticmethod:\n"
-                f"  @staticmethod\n"
-                f"  def migrate_from_previous(previous_data: dict[str, Any]) -> dict[str, Any]:\n"
-                f"      # Transform previous_data from previous version format\n"
-                f"      return previous_data"
-            )
+        if previous_model is not None:
+            if "migrate_from_previous" not in cls.__dict__:
+                raise TypeError(
+                    f"{cls.__name__} must define a staticmethod:\n"
+                    f"  @staticmethod\n"
+                    f"  def migrate_from_previous(previous_data: dict[str, Any]) -> dict[str, Any]:\n"
+                    f"      # Transform previous_data from previous version format\n"
+                    f"      return previous_data"
+                )
+
+            descriptor = cls.__dict__["migrate_from_previous"]
+            if not isinstance(descriptor, staticmethod):
+                raise TypeError(
+                    f"{cls.__name__}.migrate_from_previous must be defined as a @staticmethod with "
+                    f"signature:\n"
+                    f"  @staticmethod\n"
+                    f"  def migrate_from_previous(previous_data: dict[str, Any]) -> dict[str, Any]:\n"
+                    f"      # Transform previous_data from previous version format\n"
+                    f"      return previous_data"
+                )
 
     # Auto-managed version field. Users do not need to set/increment this manually.
     model_version: int = 1
