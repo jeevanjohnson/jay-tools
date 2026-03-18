@@ -1,9 +1,8 @@
 import functools
-from typing import Any, ClassVar, TypeVar
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, model_validator
 
-T = TypeVar("T", bound=dict[str, Any])
 
 class MigratableModel(BaseModel):
     """Base model with linear migrations using previous_model + migrate_from_previous.
