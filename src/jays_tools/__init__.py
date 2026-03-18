@@ -1,5 +1,6 @@
-from jays_tools.json_database import JsonDatabase
+from .json_database import JsonDatabase, MigratableModel
 
 __all__ = [
-    "JsonDatabase"
+    "JsonDatabase",
+    "MigratableModel"
 ]

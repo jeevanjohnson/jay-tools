@@ -1,7 +1,8 @@
 ./.venv
 .vscode/
 __pycache__/
-test.py
+*test*
+tmp_legacy.json
 ./dist
 .pypirc
 config.py

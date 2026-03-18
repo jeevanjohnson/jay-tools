@@ -1,6 +1,5 @@
-from .database import JsonDatabaseInit, JsonDatabaseOptional
 from .factory import JsonDatabase
-from .file import JsonFile
+from .models import MigratableModel
 
 # Dev Notes:
 # - __all__ is used to specify which names are visble when the module is imported using `from module import *`.
@@ -10,8 +9,6 @@ from .file import JsonFile
 #   Unsure if they'll get any errors other then that. 
 
 __all__ = [ 
-    "JsonFile", 
     "JsonDatabase", 
-    "JsonDatabaseInit", 
-    "JsonDatabaseOptional"
+    "MigratableModel"
 ]

@@ -10,6 +10,10 @@ import shutil
 # - TODO: License file, currently using MIT License, but should add a LICENSE file to the repo.
 # - TODO: This was written quickly, improve readability and error handling, for production use.
 
+# To go back commits and revert to a previous version:
+# git reset --hard {commit_hash} to reset to a previous commit if something goes wrong.
+# then git push --force-with-lease to update the remote repo with the reset commit history.
+
 def get_name(file_path: str) -> str:
     with open(file_path, "r") as f:
         for line in f:
