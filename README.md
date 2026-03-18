@@ -52,14 +52,14 @@ class Users(BaseModel):
 # Create database. File is auto-created if it doesn't exist.
 db = JsonDatabase("users.json", Users)
 
-# Sync usage - acquires lock, reads, modifies, writes on exit
+# Sync usage - reads, modifies, writes on exit
 with db as users_data:
     users_data.users.append(User(id=1, name="Jay"))
     users_data.users.append(User(id=2, name="John"))
     users_data.total = len(users_data.users)
     # Automatically writes on context exit
 
-# Async usage - same pattern, non-blocking I/O via thread pool
+# Async usage - acquires lock, same pattern, non-blocking I/O via thread pool
 async with db as users_data:
     users_data.users.append(User(id=3, name="Jane"))
     users_data.total = len(users_data.users)
