@@ -34,7 +34,7 @@ class _JsonDatabase(Generic[T]):
             database_model()
         except ValidationError as error:
             raise ValueError(
-                f"_JsonDatabase requires all fields to have defaults, but "
+                f"JsonDatabase requires all fields to have defaults, but "
                 f"{database_model.__name__} has required fields:\n{error}"
             )
 
