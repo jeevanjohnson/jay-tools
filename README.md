@@ -74,7 +74,7 @@ The core principles are:
 
 - Strongly typed, never None: your database shape is defined with Pydantic models; the context manager always returns a valid instance, so no null-checking required.
 - Minimal API surface: one entry point (`JsonDatabase`) with context-manager based read/modify/write behavior — no extra methods to learn.
-- Predictable lifecycle: enter context, mutate in memory, auto-persist on exit. Locking and concurrency are handled transparently.
+- Predictable lifecycle: enter context, mutate in memory, auto-persist on exit. Basic in-process locking is provided for async access, but it is not intended for multi-process or high-concurrency scenarios.
 - Transparent migrations: upgrade your model definition and existing data automatically migrates on load. No manual migration scripts.
 - Safe-by-default validation: corrupted or incompatible JSON raises clear errors, with optional backup snapshots before corruption is attempted.
 - Practical over perfect: optimized for local app data and prototypes where a single process owns the data, not high-concurrency or distributed workloads.
@@ -83,7 +83,7 @@ This keeps the tool simple enough to reason about while still providing structur
 
 #### Architecture & Paradigm
 
-JsonDatabase follows a typed repository-style pattern with context-managed units of work. The main class, `JsonDatabase`, serves as a factory for creating context managers that handle the lifecycle of reading, modifying, and writing JSON data. The internal class, `_JsonDatabase`, encapsulates the actual logic for file I/O, locking, and validation. The user interacts with `JsonDatabase` to define their data model and file path, and then uses the context manager to work with the data in a safe, structured way. The design abstracts away the complexities of file handling and concurrency, allowing users to focus on their data models and business logic. 
+JsonDatabase follows a typed repository-style pattern with context-managed units of work. The main class, `JsonDatabase`, serves as a factory for creating context managers that handle the lifecycle of reading, modifying, and writing JSON data. The internal class, `_JsonDatabase`, encapsulates the actual logic for file I/O, basic in-process locking, and validation. The user interacts with `JsonDatabase` to define their data model and file path, and then uses the context manager to work with the data in a safe, structured way. The design abstracts away most of the file-handling details and provides simple, in-process concurrency control, but does not aim to offer cross-process or high-concurrency guarantees, allowing users to focus on their data models and business logic. 
 
 ```mermaid
 flowchart TD
