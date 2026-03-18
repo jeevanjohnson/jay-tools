@@ -105,8 +105,7 @@ Define model versions as a linear chain using `previous_model=` parameter. When 
 
 ```python
 from typing import Any
-from jays_tools.json_database import JsonDatabase
-from jays_tools.json_database.models import MigratableModel
+from jays_tools.json_database import JsonDatabase, MigratableModel
 
 class UserV1(MigratableModel):
     name: str = ""
