@@ -90,11 +90,11 @@ flowchart TD
     A[JsonDatabase path model] --> B[_JsonDatabase Created]
     B --> C[Auto-creates file if missing]
     C --> D{Context Manager}
-    D -->|Sync| E[Read & Acquire Lock]
-    D -->|Async| F[Read & Acquire Lock via Thread]
+    D -->|Sync| E[Read]
+    D -->|Async| F[Read & Acquire Async Lock via Thread]
     E --> G[Modify Data]
     F --> G
-    G --> H[Write & Release Lock]
+    G --> H[Write (release async lock if held)]
 ```
 
 #### Migrations
