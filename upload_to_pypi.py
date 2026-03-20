@@ -124,7 +124,9 @@ if result.returncode != 0:
 result = subprocess.run(
     [
         sys.executable, "-m", "pip", "install", f"{name}=={new_version}",
-    ]
+    ],
+    capture_output=True,
+    text=True,
 )
 
 if result.returncode == 0:

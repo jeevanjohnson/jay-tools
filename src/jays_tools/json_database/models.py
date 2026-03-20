@@ -1,5 +1,5 @@
 import functools
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
 
 from pydantic import BaseModel, model_validator
 
@@ -165,3 +165,7 @@ class MigratableModel(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         # Keep instance version in sync with class chain depth.
         self.model_version = type(self).get_model_version()
+
+    def default(self) -> Self:
+        """Returns a default instance of the model with all fields set to their default values."""
+        return type(self)()
