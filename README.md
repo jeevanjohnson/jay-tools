@@ -68,6 +68,46 @@ async with db as users_data:
     # Context exit writes the value most recently provided to set(...)
 ```
 
+#### Text Encoding & Legacy Files
+
+JsonDatabase now exposes explicit text codec options so behavior is predictable across operating systems.
+
+```python
+db = JsonDatabase(
+    "users.json",
+    Users,
+    encoding="utf-8",                  # default
+    errors="strict",                   # default
+    read_fallback_encodings=(),         # default (no fallback)
+    ensure_ascii=False,                 # default
+)
+```
+
+Behavior contract:
+
+- Default mode: UTF-8 strict, no fallback. This is modern and deterministic.
+- Legacy compatibility mode: provide `read_fallback_encodings=("cp1252", "latin-1")` to read older Windows files.
+- Self-healing writes: writes always use your primary encoding (UTF-8 by default), so legacy files get normalized once rewritten.
+- Backup behavior: backups are written using the same primary encoding as writes.
+
+Legacy compatibility example:
+
+```python
+legacy_db = JsonDatabase(
+    "legacy_users.json",
+    Users,
+    read_fallback_encodings=("cp1252", "latin-1"),
+)
+
+with legacy_db as users_data:
+    # If file was cp1252, it is still readable here.
+    users_data.total = len(users_data.users)
+    legacy_db.set(users_data)
+    # File is rewritten as UTF-8 by default.
+```
+
+If decoding fails for the primary encoding and all fallbacks, JsonDatabase raises a clear error listing all attempted encodings.
+
 #### Design Philosophy
 
 JsonDatabase is intentionally designed for single-project, low-ceremony persistence where code clarity matters more than feature depth.

@@ -28,6 +28,10 @@ class _JsonDatabase(Generic[T]):
         path: str | Path,
         database_model: Type[T],
         backup_on_validation_error: bool,
+        encoding: str,
+        errors: str,
+        read_fallback_encodings: tuple[str, ...],
+        ensure_ascii: bool,
     ):
 
         try:
@@ -41,6 +45,10 @@ class _JsonDatabase(Generic[T]):
         self.path = JsonFile(path)
 
         self.backup_on_validation_error = backup_on_validation_error
+        self.encoding = encoding
+        self.errors = errors
+        self.read_fallback_encodings = read_fallback_encodings
+        self.ensure_ascii = ensure_ascii
         self.database_model = database_model
         self.database: T = self.database_model()
         
@@ -92,17 +100,45 @@ class _JsonDatabase(Generic[T]):
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
         self.path.write_text(
-            data.model_dump_json(indent=4)
+            data.model_dump_json(indent=4, ensure_ascii=self.ensure_ascii),
+            encoding=self.encoding,
+            errors=self.errors,
         )
 
-    def backup(self) -> None:
+    def backup(self, source_text: str | None = None) -> None:
         current_epoch_time = int(time.time())
 
         backup_path = self.path.with_name(f"{self.path.stem}_backup_{current_epoch_time}.json")
-        
+
+        if source_text is None:
+            source_text = self._read_text_with_fallback()
+
         backup_path.write_text(
-            self.path.read_text()
+            source_text,
+            encoding=self.encoding,
+            errors=self.errors,
         )
+
+    def _read_text_with_fallback(self) -> str:
+        attempted_encodings = [self.encoding, *self.read_fallback_encodings]
+        attempted_details: list[str] = []
+        last_decode_error: UnicodeDecodeError | None = None
+
+        # Try primary encoding first, then optional fallback encodings in order.
+        for candidate_encoding in attempted_encodings:
+            try:
+                return self.path.read_text(encoding=candidate_encoding, errors=self.errors)
+            except UnicodeDecodeError as decode_error:
+                attempted_details.append(f"{candidate_encoding} ({decode_error})")
+                last_decode_error = decode_error
+
+        attempted_list = ", ".join(attempted_encodings)
+        raise ValueError(
+            f"Failed to decode database file {self.path}. "
+            f"Attempted encodings: {attempted_list}. "
+            f"Primary errors mode: {self.errors}. "
+            f"Decode errors: {' | '.join(attempted_details)}"
+        ) from last_decode_error
 
     def read(self) -> T:
         if not self.path.exists():
@@ -113,7 +149,7 @@ class _JsonDatabase(Generic[T]):
             self.write(new_instance)
             return new_instance
         
-        data = self.path.read_text()
+        data = self._read_text_with_fallback()
 
         if data:
             try:
@@ -125,7 +161,7 @@ class _JsonDatabase(Generic[T]):
                 )
 
                 if self.backup_on_validation_error:
-                    self.backup()
+                    self.backup(source_text=data)
                     error_message += (
                         "\nA backup of the invalid data has been created with a timestamp in the filename. "
                     )
